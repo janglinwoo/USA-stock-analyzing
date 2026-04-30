@@ -19,11 +19,13 @@ This project analyzes major US news and community information to:
 - Collect historical stock data and technical indicators
 - **Status**: Complete
 
-### Phase 2: Sentiment Analysis & Feature Engineering (Next)
-- NLP-based sentiment analysis using transformers
-- Community sentiment from Reddit, StockTwits
-- Technical indicator calculations
-- Feature engineering for ML models
+### Phase 2: Sentiment Analysis & Feature Engineering ✅
+- NLP-based sentiment analysis using VADER and FinBERT transformers
+- Community sentiment from Reddit (via Pushshift API)
+- Retail sentiment from StockTwits API
+- Engagement metrics and momentum indicators
+- Comprehensive feature engineering for ML models
+- **Status**: Complete
 
 ### Phase 3: Machine Learning Models
 - Binary classification: Stock direction (up/down)
@@ -89,6 +91,33 @@ This will:
 4. Fetch current stock data and technical indicators
 5. Save results to `phase1_results_*.json`
 
+### Running Phase 2
+
+```bash
+python phase2_main.py [phase1_results_file.json]
+```
+
+Or automatically use the latest Phase 1 results:
+```bash
+python phase2_main.py
+```
+
+This will:
+1. Load Phase 1 event detection results
+2. Analyze news sentiment (VADER + FinBERT)
+3. Fetch Reddit discussion data and sentiment
+4. Fetch StockTwits community sentiment
+5. Calculate technical indicators
+6. Create ML-ready feature vectors
+7. Save results to `phase2_results_*.json` and `.csv`
+
+**Output includes:**
+- Sentiment scores (news, Reddit, StockTwits)
+- Engagement metrics (posts, comments, likes)
+- Technical indicators (RSI, MACD, Bollinger Bands)
+- Combined sentiment score (weighted average)
+- Momentum score (multi-factor indicator)
+
 ## Project Structure
 
 ```
@@ -145,6 +174,61 @@ The system uses multiple strategies to extract tickers:
 - Free tier: 5 requests/min, 500/day
 - Add to `.env`: `ALPHA_VANTAGE_API_KEY=your_key_here`
 
+## Sentiment Analysis
+
+### VADER (Valence Aware Dictionary and sEntiment Reasoner)
+- Fast rule-based sentiment analysis
+- Good for social media and informal text
+- Returns scores: -1 (negative) to +1 (positive)
+
+### FinBERT (Financial BERT)
+- Transformer-based deep learning model
+- Trained specifically on financial text
+- More accurate for complex financial news
+- Used when available, falls back to VADER
+
+### Combined Score
+- Weighted average: 40% VADER + 60% FinBERT
+- Provides robust sentiment indicator
+
+## Community Sentiment Sources
+
+### Reddit (via Pushshift API)
+- Subreddits: stocks, investing, wallstreetbets, stockmarket, etc.
+- Metrics: post count, engagement, average scores
+- Free API, no authentication needed
+
+### StockTwits
+- Real-time retail investor sentiment
+- Bullish/bearish classification
+- User influence based on follower count
+- Engagement metrics (likes, replies)
+
+## Feature Engineering
+
+Created features for ML models:
+
+### Event Features
+- Presence of earnings, acquisition, contract, product launch, regulatory approval, etc.
+- Recency of most recent event
+
+### Sentiment Features
+- News sentiment score and distribution
+- Reddit engagement density
+- StockTwits bullish/bearish ratios
+- Combined weighted sentiment
+
+### Technical Features
+- RSI (overbought/oversold indicator)
+- MACD (trend indicator)
+- Bollinger Bands position
+- Volume ratio vs. average
+- SMA 20/50 crossover signals
+
+### Derived Features
+- Combined sentiment score (weighted multi-source)
+- Momentum score (event recency + RSI + sentiment + volume)
+
 ## Output Format
 
 Phase 1 generates JSON output with:
@@ -199,10 +283,23 @@ python main.py --test  # Test mode (optional, to be implemented)
 
 ## Next Steps
 
-1. **Phase 2**: Implement sentiment analysis with transformers and community data
-2. **Phase 3**: Build ML models for prediction
-3. **Phase 4**: Set up real-time pipeline with APScheduler
-4. **Phase 5**: Develop interactive web dashboard
+1. ✅ **Phase 1**: Data Collection & Event Detection - COMPLETE
+2. ✅ **Phase 2**: Sentiment Analysis & Feature Engineering - COMPLETE
+3. **Phase 3**: Machine Learning Model Training
+   - Binary classification: predict price direction (up/down)
+   - Regression: predict price range (±%)
+   - Model evaluation and backtesting
+   - Feature importance analysis
+4. **Phase 4**: Real-time Pipeline & Automation
+   - APScheduler for hourly updates
+   - FastAPI endpoints for manual triggers
+   - Database storage for predictions
+   - Alert system for significant predictions
+5. **Phase 5**: Web Dashboard
+   - Interactive visualization
+   - Real-time prediction updates
+   - Historical performance tracking
+   - Sentiment heatmaps
 
 ## License
 
