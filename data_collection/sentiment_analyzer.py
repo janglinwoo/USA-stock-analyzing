@@ -1,43 +1,25 @@
 from typing import Dict, List
-from textblob import TextBlob
-from transformers import pipeline
-import warnings
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
-warnings.filterwarnings("ignore")
-
 
 class SentimentAnalyzer:
-    """Analyze sentiment from news articles and community posts."""
+    """Analyze sentiment from news articles and community posts using VADER only."""
 
-    def __init__(self, use_transformer: bool = True):
+    def __init__(self, use_transformer: bool = False):
         """
-        Initialize sentiment analyzer.
+        Initialize sentiment analyzer with VADER only (Windows compatible).
 
         Args:
-            use_transformer: Use transformer models for advanced analysis
+            use_transformer: Ignored - VADER only
         """
-        self.use_transformer = use_transformer
-        self.transformer_pipeline = None
-
-        if use_transformer:
-            try:
-                # Financial sentiment model
-                self.transformer_pipeline = pipeline(
-                    "sentiment-analysis",
-                    model="ProsusAI/finbert",
-                    device=-1  # CPU, use 0 for GPU
-                )
-                logger.info("Loaded FinBERT transformer model")
-            except Exception as e:
-                logger.warning(f"Could not load FinBERT: {e}. Falling back to VADER.")
-                self.use_transformer = False
+        self.use_transformer = False
+        logger.info("Using VADER sentiment analyzer (transformers disabled for Windows compatibility)")
 
     def analyze_text(self, text: str) -> Dict:
         """
-        Analyze sentiment of text using multiple methods.
+        Analyze sentiment of text using VADER.
 
         Args:
             text: Text to analyze
@@ -55,25 +37,13 @@ class SentimentAnalyzer:
             }
 
         vader_result = self._analyze_vader(text)
-        transformer_result = (
-            self._analyze_transformer(text)
-            if self.use_transformer
-            else None
-        )
-
-        # Combine scores
-        combined_score = self._combine_scores(vader_result, transformer_result)
 
         return {
             "vader_sentiment": vader_result["sentiment"],
             "vader_score": vader_result["score"],
-            "transformer_sentiment": (
-                transformer_result["sentiment"] if transformer_result else None
-            ),
-            "transformer_score": (
-                transformer_result["score"] if transformer_result else None
-            ),
-            "combined_score": combined_score,
+            "transformer_sentiment": None,
+            "transformer_score": None,
+            "combined_score": vader_result["score"],
         }
 
     def analyze_articles(self, articles: List[Dict]) -> List[Dict]:
@@ -134,45 +104,6 @@ class SentimentAnalyzer:
         except Exception as e:
             logger.error(f"Error in VADER analysis: {e}")
             return {"sentiment": "unknown", "score": 0.0}
-
-    def _analyze_transformer(self, text: str) -> Dict:
-        """Transformer-based sentiment analysis."""
-        try:
-            if len(text) > 512:
-                text = text[:512]
-
-            result = self.transformer_pipeline(text)[0]
-
-            # Convert transformer output to standard format
-            label = result["label"].lower()
-            score = result["score"]
-
-            # Normalize score to -1 to 1 range
-            if label == "negative":
-                normalized_score = -score
-            else:  # positive
-                normalized_score = score
-
-            return {"sentiment": label, "score": normalized_score}
-
-        except Exception as e:
-            logger.error(f"Error in transformer analysis: {e}")
-            return {"sentiment": "unknown", "score": 0.0}
-
-    @staticmethod
-    def _combine_scores(
-        vader_result: Dict, transformer_result: Dict = None
-    ) -> float:
-        """Combine VADER and transformer scores."""
-        if transformer_result is None:
-            return vader_result["score"]
-
-        # Weight: 40% VADER, 60% Transformer (financial sentiment)
-        vader_score = vader_result["score"]
-        transformer_score = transformer_result["score"]
-
-        combined = (vader_score * 0.4) + (transformer_score * 0.6)
-        return min(1.0, max(-1.0, combined))  # Clamp to [-1, 1]
 
     def get_sentiment_summary(self, articles: List[Dict]) -> Dict:
         """
