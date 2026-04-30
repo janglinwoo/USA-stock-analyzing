@@ -1,5 +1,5 @@
 import React from 'react';
-import { Prediction } from '@types/index';
+import { Prediction } from '@types';
 import { TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
 
 interface Props {

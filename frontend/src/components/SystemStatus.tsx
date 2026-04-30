@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SystemStatus, JobStatus } from '@types/index';
+import { SystemStatus, JobStatus } from '@types';
 import { apiClient } from '@api/client';
 import { Activity, Clock, Database, Zap } from 'lucide-react';
 

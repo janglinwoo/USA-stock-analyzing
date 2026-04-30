@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Prediction } from '@types/index';
+import { Prediction } from '@types';
 import { apiClient } from '@api/client';
 import { PredictionCard } from '@components/PredictionCard';
 import { SystemStatusComponent } from '@components/SystemStatus';
