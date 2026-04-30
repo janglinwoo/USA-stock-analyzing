@@ -27,6 +27,15 @@ This project analyzes major US news and community information to:
 - Comprehensive feature engineering for ML models
 - **Status**: Complete
 
+### Phase 4: Real-time Pipeline & Automation ✅
+- Integrated pipeline combining Phase 1, 2, and 3
+- APScheduler for hourly automatic updates
+- FastAPI REST API with multiple endpoints
+- SQLite database for prediction history and tracking
+- Real-time prediction capability
+- Performance metrics and backtest tracking
+- **Status**: Complete
+
 ### Phase 3: Machine Learning Model Training ✅
 - Binary classification: predict price direction (up/down)
   - Models: Logistic Regression, Random Forest, Gradient Boosting, XGBoost
@@ -155,6 +164,45 @@ This will:
 - Feature importance rankings
 - Backtest performance (return %, win rate, Sharpe ratio)
 
+### Running Phase 4
+
+**Option 1: API Server (FastAPI)**
+```bash
+python phase4_main.py --mode api --host 0.0.0.0 --port 8000
+```
+
+Then access:
+- API Docs: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+**Option 2: Single Pipeline Run**
+```bash
+python phase4_main.py --mode run-once --days-back 1
+```
+
+**Option 3: Background Scheduler**
+```bash
+python phase4_main.py --mode scheduler --interval 60
+```
+
+This will:
+1. Initialize database for prediction history
+2. Set up real-time prediction pipeline
+3. Run periodic updates (default: every 60 minutes)
+4. Save predictions and events to database
+
+**API Endpoints:**
+- `POST /predict` - Make prediction for single stock
+- `GET /predictions/{ticker}` - Get prediction history
+- `POST /pipeline/run` - Manually trigger full pipeline
+- `POST /scheduler/start` - Start automatic updates
+- `POST /scheduler/stop` - Stop automatic updates
+- `GET /scheduler/jobs` - List scheduled jobs
+- `GET /performance` - Get model performance metrics
+- `GET /accuracy/{days_back}` - Get recent prediction accuracy
+- `GET /health` - Health check
+- `GET /status` - System status
+
 ## Project Structure
 
 ```
@@ -176,13 +224,24 @@ USA-stock-analyzing/
 │   ├── direction_classifier.py      # Up/Down prediction models
 │   ├── price_predictor.py           # Price range regression models
 │   └── model_evaluator.py           # Evaluation & backtesting
-├── database/                        # Database layer (Phase 4)
+├── database/
+│   ├── __init__.py
+│   └── db.py                        # SQLAlchemy models & database ops
+├── pipeline/
+│   ├── __init__.py
+│   ├── realtime_pipeline.py         # Integrated Phase 1+2+3 pipeline
+│   └── scheduler.py                 # APScheduler for automation
+├── api/
+│   ├── __init__.py
+│   ├── app.py                       # FastAPI application
+│   └── models.py                    # Pydantic request/response models
 ├── utils/
 │   ├── __init__.py
 │   └── logger.py                    # Logging configuration
 ├── main.py                          # Phase 1 main script
 ├── phase2_main.py                   # Phase 2 main script
 ├── phase3_main.py                   # Phase 3 main script
+├── phase4_main.py                   # Phase 4 main script (API/scheduler)
 ├── requirements.txt
 ├── .env.example
 └── README.md
@@ -333,22 +392,19 @@ python main.py --test  # Test mode (optional, to be implemented)
 1. ✅ **Phase 1**: Data Collection & Event Detection - COMPLETE
 2. ✅ **Phase 2**: Sentiment Analysis & Feature Engineering - COMPLETE
 3. ✅ **Phase 3**: Machine Learning Model Training - COMPLETE
-   - 4 classification models + 6 regression models trained
-   - Cross-validation and backtest results
-   - Feature importance analysis
-4. **Phase 4**: Real-time Pipeline & Automation
-   - APScheduler for hourly updates (every 1 hour)
-   - FastAPI endpoints for manual/immediate updates
-   - SQLite/PostgreSQL database for prediction history
-   - Alert system for significant predictions
-   - Combined Phase 1+2+3 pipeline
-5. **Phase 5**: Web Dashboard
-   - FastAPI backend with REST API
+4. ✅ **Phase 4**: Real-time Pipeline & Automation - COMPLETE
+   - Integrated pipeline combining all phases
+   - APScheduler for hourly automatic updates
+   - FastAPI REST API with 11+ endpoints
+   - SQLite database for persistence
+   - Three execution modes: API server, one-time run, background scheduler
+5. **Phase 5**: Web Dashboard (Final Phase)
    - React/Vue.js frontend
    - Real-time prediction updates
-   - Historical performance tracking
-   - Sentiment heatmaps and charts
-   - Stock recommendation list
+   - Interactive sentiment heatmaps
+   - Historical performance charts
+   - Stock recommendation list with confidence scores
+   - Alert notifications for significant signals
 
 ## License
 
