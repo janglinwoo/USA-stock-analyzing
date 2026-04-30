@@ -27,11 +27,17 @@ This project analyzes major US news and community information to:
 - Comprehensive feature engineering for ML models
 - **Status**: Complete
 
-### Phase 3: Machine Learning Models
-- Binary classification: Stock direction (up/down)
-- Regression: Price range prediction (±%)
-- Model training and backtesting
+### Phase 3: Machine Learning Model Training ✅
+- Binary classification: predict price direction (up/down)
+  - Models: Logistic Regression, Random Forest, Gradient Boosting, XGBoost
+  - Evaluation: Accuracy, Precision, Recall, F1-Score, ROC-AUC
+- Regression: predict price change percentage
+  - Models: Linear, Ridge, Lasso, Random Forest, Gradient Boosting, XGBoost
+  - Evaluation: RMSE, MAE, R² Score, ±2% and ±5% accuracy
+- Cross-validation for model robustness
+- Backtesting on historical data
 - Feature importance analysis
+- **Status**: Complete
 
 ### Phase 4: Real-time Pipeline
 - APScheduler for hourly updates
@@ -118,24 +124,65 @@ This will:
 - Combined sentiment score (weighted average)
 - Momentum score (multi-factor indicator)
 
+### Running Phase 3
+
+```bash
+python phase3_main.py [phase2_results_file.csv]
+```
+
+Or automatically use the latest Phase 2 results:
+```bash
+python phase3_main.py
+```
+
+This will:
+1. Load Phase 2 features
+2. Create synthetic target variables (direction + price change)
+3. Train direction classification models:
+   - Logistic Regression, Random Forest, Gradient Boosting, XGBoost
+4. Train price prediction (regression) models:
+   - Linear, Ridge, Lasso, Random Forest, Gradient Boosting, XGBoost
+5. Perform 5-fold cross-validation
+6. Evaluate models (Accuracy, F1, RMSE, R²)
+7. Backtest on test data
+8. Extract feature importance
+9. Save results to `phase3_results_*.json`
+
+**Output includes:**
+- Best models for direction and price prediction
+- Comprehensive evaluation metrics
+- Cross-validation scores
+- Feature importance rankings
+- Backtest performance (return %, win rate, Sharpe ratio)
+
 ## Project Structure
 
 ```
 USA-stock-analyzing/
 ├── config/
 │   ├── __init__.py
-│   └── config.py              # Configuration and constants
+│   └── config.py                    # Configuration and constants
 ├── data_collection/
 │   ├── __init__.py
-│   ├── news_fetcher.py        # NewsAPI integration
-│   ├── stock_data_fetcher.py  # yfinance integration
-│   └── event_detector.py      # Event detection logic
-├── models/                    # ML models (Phase 3)
-├── database/                  # Database layer (Phase 4)
+│   ├── news_fetcher.py              # NewsAPI integration
+│   ├── stock_data_fetcher.py        # yfinance integration
+│   ├── event_detector.py            # Event detection logic
+│   ├── sentiment_analyzer.py        # VADER + FinBERT sentiment
+│   ├── reddit_fetcher.py            # Reddit data via Pushshift
+│   ├── stocktwits_fetcher.py        # StockTwits sentiment
+│   └── feature_engineer.py          # ML feature creation
+├── models/
+│   ├── __init__.py
+│   ├── direction_classifier.py      # Up/Down prediction models
+│   ├── price_predictor.py           # Price range regression models
+│   └── model_evaluator.py           # Evaluation & backtesting
+├── database/                        # Database layer (Phase 4)
 ├── utils/
 │   ├── __init__.py
-│   └── logger.py              # Logging configuration
-├── main.py                    # Phase 1 main script
+│   └── logger.py                    # Logging configuration
+├── main.py                          # Phase 1 main script
+├── phase2_main.py                   # Phase 2 main script
+├── phase3_main.py                   # Phase 3 main script
 ├── requirements.txt
 ├── .env.example
 └── README.md
@@ -285,21 +332,23 @@ python main.py --test  # Test mode (optional, to be implemented)
 
 1. ✅ **Phase 1**: Data Collection & Event Detection - COMPLETE
 2. ✅ **Phase 2**: Sentiment Analysis & Feature Engineering - COMPLETE
-3. **Phase 3**: Machine Learning Model Training
-   - Binary classification: predict price direction (up/down)
-   - Regression: predict price range (±%)
-   - Model evaluation and backtesting
+3. ✅ **Phase 3**: Machine Learning Model Training - COMPLETE
+   - 4 classification models + 6 regression models trained
+   - Cross-validation and backtest results
    - Feature importance analysis
 4. **Phase 4**: Real-time Pipeline & Automation
-   - APScheduler for hourly updates
-   - FastAPI endpoints for manual triggers
-   - Database storage for predictions
+   - APScheduler for hourly updates (every 1 hour)
+   - FastAPI endpoints for manual/immediate updates
+   - SQLite/PostgreSQL database for prediction history
    - Alert system for significant predictions
+   - Combined Phase 1+2+3 pipeline
 5. **Phase 5**: Web Dashboard
-   - Interactive visualization
+   - FastAPI backend with REST API
+   - React/Vue.js frontend
    - Real-time prediction updates
    - Historical performance tracking
-   - Sentiment heatmaps
+   - Sentiment heatmaps and charts
+   - Stock recommendation list
 
 ## License
 
